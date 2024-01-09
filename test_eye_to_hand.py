@@ -1,31 +1,79 @@
-from myUtils.ArucoDetector import ArucoDetector
-from myUtils.MyRobotController import MyRobotController
-from myUtils.CoordinateTransform import CoordinateTransform
 import cv2
 import threading
 import time
 
 
-def thread_func_2(arucoDetector,coordinateTransform,myRobotController): 
-    left_aruco_id = 1
-    right_aruco_id = 2
-    while True:
-        time.sleep(0.5)
-        if right_aruco_id in arucoDetector.res_dict:
-            [ex,ey,ez] = arucoDetector.res_dict[right_aruco_id]["tvec"][0]
-            hx,hy,hz = coordinateTransform.eyeXYZ2HandXYZ(ex,ey,ez)
-            print("眼部坐标",ex,ey,ez, "手部坐标",hx*1000,hy*1000,hz*1000)
-            myRobotController.printBaseCorrds()
-            
+import rospy
+import tf
+import transforms3d as tfs
+import geometry_msgs.msg
+import sys
+import numpy as np
+import math
+from tf2_msgs.msg import TFMessage
+import json
+
+#aruco_ros single 单个结果获取 对应aruco_start_usb_cam.launch
+def getRobotCoords():
+    trans2,rot2 = [-0.125796  ,   0.0305877 ,  0.546227     ],[ 0.15192925503660906, -0.9875980375216189, 0.027663476853261607,0.02832577970432306]
+    camera_link="/camera_frame"
+    marker_link= "/aruco_marker_frame"
+    base_link="/base"
+    
+    rospy.init_node('test_hand_to_eye')  
+    rate = rospy.Rate(1.0) 
+    br = tf.TransformBroadcaster()  
+    listener = tf.TransformListener()
+    while not rospy.is_shutdown(): 
+        try:
+            br.sendTransform(trans2,rot2,rospy.Time.now(),camera_link,base_link)
+            (trans1,rot1) = listener.lookupTransform(base_link,marker_link, rospy.Time(0))
+            print("result:%s->%s, %s,%s" % (base_link,marker_link,trans1,rot1))
+
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            continue
+        rate.sleep()
+
+#启动两个aruco节点，对应启动aruco_start_usb_cam_duble_marker.launch,对应的id需要去这个文件中设置
+def getDoubleRobotCoords():
+    trans2,rot2 = [-0.125796  ,   0.0305877 ,  0.546227     ],[ 0.15192925503660906, -0.9875980375216189, 0.027663476853261607,0.02832577970432306]
+    camera_link1="/camera_frame1"
+    camera_link2="/camera_frame2"
+    marker_link1= "/aruco_marker_frame1"
+    marker_link2= "/aruco_marker_frame2"
+    base_link="/base"
+    
+    rospy.init_node('test_hand_to_eye')  
+    rate = rospy.Rate(1.0) 
+    br = tf.TransformBroadcaster()  
+    listener = tf.TransformListener()
+    global transID1,transID2
+    while not rospy.is_shutdown(): 
+        try:
+            br.sendTransform(trans2,rot2,rospy.Time.now(),camera_link1,base_link)
+            (transID1,rotID1) = listener.lookupTransform(base_link,marker_link1, rospy.Time(0))
+            transID1[0]=transID1[0]*(-1.0) 
+            print("result:%s->%s, %s,%s" % (base_link,marker_link1,transID1,rotID1))
+
+
+            br.sendTransform(trans2,rot2,rospy.Time.now(),camera_link2,base_link)
+            (transID2,rotID2) = listener.lookupTransform(base_link,marker_link2, rospy.Time(0))
+            transID2[0]=transID2[0]*(-1.0)
+            print("result:%s->%s, %s,%s" % (base_link,marker_link2,transID2,rotID2))
+
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            pass
+        rate.sleep()
             
 
 def thread_func_1(aruco_detector):  
     aruco_detector.detectByCamera()
       
 if __name__ == '__main__':
-    arucoDetector = ArucoDetector()
-    
-    myRobotController = MyRobotController()
+
+    getDoubleRobotCoords()
+
+    '''
     # time.sleep(3)
     myRobotController.init()
     
@@ -53,7 +101,7 @@ if __name__ == '__main__':
     
     cap.release()
     cv2.destroyAllWindows()
-    
+    '''
     
     
     

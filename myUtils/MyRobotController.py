@@ -98,17 +98,27 @@ class MyRobotController:
     # @retry_on_failure()
     def getAllBaseCoords(self):
         time.sleep(2)
+        '''
         coordsL=self.mc.get_base_coord(1)
         while coordsL is None or len(coordsL)==0:
             print(coordsL)
+            time.sleep(1)
             coordsL=self.mc.get_base_coord(1)
         print(coordsL)
         time.sleep(1)
         coordsR=self.mc.get_base_coord(2)
         while coordsR is None or  len(coordsR)==0:
+            time.sleep(1)
             coordsR=self.mc.get_base_coord(2)
         print(coordsR)
-        return [coordsL,coordsR]
+        '''
+        coords= self.mc.get_base_coords()
+        while coords is None or  len(coords)==0:
+            time.sleep(1)
+            print(coords)
+            coords = self.mc.get_base_coords()
+        return coords
+        # return [coordsL,coordsR]
 
     def moveByCoords(self,coords):
         #移动左臂
@@ -171,14 +181,12 @@ class MyRobotController:
         
         
 if __name__ == '__main__':
-    
-    
     #测试:初始化连接-移动到抓取状态-输出角度和位姿-释放手臂
     mRC  = MyRobotController()
     # mRC.init()
-    mRC.printAngles()
-    mRC.printBaseCorrds()
-    # mRC.release()
+    # mRC.printAngles()
+    # mRC.printBaseCorrds()
+    mRC.release()
     
 
 

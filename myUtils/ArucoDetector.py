@@ -1,3 +1,6 @@
+#使用opencv自带的aruco
+
+
 import numpy as np
 import time
 import cv2
@@ -120,4 +123,4 @@ class ArucoDetector:
 
 if __name__ == "__main__":
     aruco_detection = ArucoDetector()
-    aruco_detection.detectByCamera( cv2.VideoCapture(1))
+    aruco_detection.detectByCamera( cv2.VideoCapture('/dev/video4'))
