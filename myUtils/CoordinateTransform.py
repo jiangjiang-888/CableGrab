@@ -6,9 +6,8 @@ import math
 
 class CoordinateTransform:
     def __init__(self):
-        self.x, self.y, self.z = -0.125796, 0.0305877, 0.546227  # 平移
-        self.rx, self.ry, self.rz = -3.09545, -0.0643993, -2.8378  # 旋转
-        self.qw, self.qx, self.qy, self.qz =0.02832577970432306, 0.15192925503660906, -0.9875980375216189, 0.027663476853261607   #四元数
+        self.x, self.y, self.z = -0.165  ,  -0.05 , 0.584369  # 平移
+        self.rx, self.ry, self.rz = 3.14 ,  0  , 0   # 旋转
         
     def get_matrix_eular_radu(self):
         mat = tfs.euler.euler2mat(self.rx, self.ry, self.rz)
@@ -32,13 +31,9 @@ class CoordinateTransform:
         hand_x, hand_y, hand_z, _ = np.dot(rmat, eyeMat)
         return hand_x, hand_y, hand_z
 
-
-
 if __name__ == "__main__":
-
-    # hand = [-0.09214994723594513, -0.02118715313623601, 0.08244428882092639]
-    # eye= [-0.058688387274742126, -0.023314662277698517, 0.4467763602733612]
-    eye= [0, 0, 0.43447]
+    hand = [0.1896, -0.046200000000000005, 0.0723]
+    eye= [0.05342663764056446,-0.012832965467842449,0.5143761178699267]
     coordinate_transform = CoordinateTransform()
-    # print(coordinate_transform.handXYZ2EyeXYZ(*hand))
+    print(coordinate_transform.handXYZ2EyeXYZ(*hand))
     print(coordinate_transform.eyeXYZ2HandXYZ(*eye))
